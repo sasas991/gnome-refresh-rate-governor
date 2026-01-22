@@ -20,8 +20,8 @@ https://extensions.gnome.org/extension/8277/screen-brightness-governor/
 1. **Download and install the extension files**
 
    ```sh
-   git clone https://github.com/inbalboa/gnome-brightness-governor.git
-   cd gnome-brightness-governor
+   git clone https://github.com/sasas991/gnome-refresh-rate-governor
+   cd gnome-refresh-rate-governor
    make install
    ```
    Requires `git`, `make`, `jq`
@@ -32,12 +32,12 @@ https://extensions.gnome.org/extension/8277/screen-brightness-governor/
 
 3. **Enable the extension**
    ```sh
-   gnome-extensions enable brightness-governor@inbalboa.github.io
+   gnome-extensions enable refresh-rate-governor@sasas991.github.io
    ```
 
 ## Acknowledgments
 
-This extension is a fork of [Auto Screen Brightness](https://github.com/popov895/auto-screen-brightness) extension by [Eugene Popov](https://github.com/popov895) adapted to the latest GNOME Shell version. 
+This extension is a fork of [Screen Brightness Governor](https://github.com/inbalboa/gnome-brightness-governor) extension by [Serhiy Shliapuhin](https://github.com/inbalboa/gnome-brightness-governor) adapted to the latest GNOME Shell version. 
 
 ## License
 
