@@ -1,5 +1,5 @@
 # Screen Refresh Rate Governor - GNOME Shell Extension
-[<img src="https://raw.githubusercontent.com/andyholmes/gnome-shell-extensions-badge/master/get-it-on-ego.svg?sanitize=true" height="100">](https://extensions.gnome.org/extension/8277/screen-brightness-governor/)
+
 
 Automatically switch the screen refresh rate depending on the power supply status.
 
@@ -11,9 +11,7 @@ Automatically switch the screen refresh rate depending on the power supply statu
 
 ## Installation
 
-### From GNOME Extensions
 
-https://extensions.gnome.org/extension/8277/screen-brightness-governor/
 
 ### Manual Installation
 
