@@ -1,7 +1,7 @@
 import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
 
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
-import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 const PowerManagerProxyInterface = `
 <node>
@@ -11,28 +11,19 @@ const PowerManagerProxyInterface = `
 </node>`;
 const PowerManagerProxy = Gio.DBusProxy.makeProxyWrapper(PowerManagerProxyInterface);
 
-export default class ScreenBrightnessGovernorExtension extends Extension {
+export default class RefreshRateGovernorExtension extends Extension {
     enable() {
         this._settings = this.getSettings();
-        this._brightnessAcId = this._settings.connect('changed::brightness-ac', () => {
+        this._refreshRateAcId = this._settings.connect('changed::refresh-rate-ac', () => {
             if (this._powerManagerProxy?.OnBattery === false)
-                this._updateScreenBrightness();
+                this._updateRefreshRate();
         });
-        this._brightnessBatteryId = this._settings.connect('changed::brightness-battery', () => {
+        this._refreshRateBatteryId = this._settings.connect('changed::refresh-rate-battery', () => {
             if (this._powerManagerProxy?.OnBattery === true)
-                this._updateScreenBrightness();
+                this._updateRefreshRate();
         });
 
-        this._brightnessManagerChangedId = null;
-        if (Main.brightnessManager) {
-            this._brightnessManagerChangedId = Main.brightnessManager.connect('changed', () => {
-                if (Main.brightnessManager.globalScale && this._brightnessManagerChangedId) {
-                    Main.brightnessManager.disconnect(this._brightnessManagerChangedId);
-                    this._brightnessManagerChangedId = null;
-                    this._updateScreenBrightness();
-                }
-            });
-        }
+        this._connectorName = this._getConnectorName();
 
         this._powerManagerProxy = new PowerManagerProxy(
             Gio.DBus.system,
@@ -45,43 +36,56 @@ export default class ScreenBrightnessGovernorExtension extends Extension {
         );
         this._powerManagerProxy.connectObject('g-properties-changed', (...[, properties]) => {
             if (properties.lookup_value('OnBattery', null) !== null)
-                this._updateScreenBrightness();
+                this._updateRefreshRate();
         }, this);
     }
 
     disable() {
         // This extension uses the 'unlock-dialog' session mode to be able
-        // to switch the screen brightness when the screen is locked.
+        // to switch the refresh rate when the screen is locked.
         this._powerManagerProxy.disconnectObject(this);
         delete this._powerManagerProxy;
 
-        if (this._brightnessManagerChangedId && Main.brightnessManager) {
-            Main.brightnessManager.disconnect(this._brightnessManagerChangedId);
-            this._brightnessManagerChangedId = null;
+        if (this._refreshRateBatteryId && this._settings) {
+            this._settings.disconnect(this._refreshRateBatteryId);
+            this._refreshRateBatteryId = null;
         }
-
-        if (this._brightnessBatteryId && this._settings) {
-            this._settings.disconnect(this._brightnessBatteryId);
-            this._brightnessBatteryId = null;
-        }
-        if (this._brightnessAcId && this._settings) {
-            this._settings.disconnect(this._brightnessAcId);
-            this._brightnessAcId = null;
+        if (this._refreshRateAcId && this._settings) {
+            this._settings.disconnect(this._refreshRateAcId);
+            this._refreshRateAcId = null;
         }
     }
 
-    _updateScreenBrightness() {
-        if (!Main.brightnessManager?.globalScale || this._powerManagerProxy?.OnBattery === null)
+    _getConnectorName() {
+        try {
+            const [, output] = GLib.spawn_command_line_sync('displayctl get-default-output');
+            if (output) {
+                const connector = output.toString().trim();
+                if (connector)
+                    return connector;
+            }
+        } catch (e) {
+            logError(e, 'Failed to get default output connector');
+        }
+        // Fallback to common connector names
+        return 'eDP-1';
+    }
+
+    _updateRefreshRate() {
+        if (this._powerManagerProxy?.OnBattery === null || !this._connectorName)
             return;
 
-        let brightnessPercent;
+        let refreshRate;
         if (this._powerManagerProxy.OnBattery)
-            brightnessPercent = this._settings.get_int('brightness-battery');
+            refreshRate = this._settings.get_int('refresh-rate-battery');
         else
-            brightnessPercent = this._settings.get_int('brightness-ac');
+            refreshRate = this._settings.get_int('refresh-rate-ac');
 
-        // (0-100) to (0.0-1.0)
-        const brightnessValue = Math.clamp(brightnessPercent / 100.0, 0.0, 1.0);
-        Main.brightnessManager.globalScale.value = brightnessValue;
+        try {
+            const command = `displayconfig-mutter set --connector ${this._connectorName} --refresh-rate ${refreshRate}`;
+            GLib.spawn_command_line_async(command);
+        } catch (e) {
+            logError(e, `Failed to set refresh rate to ${refreshRate}`);
+        }
     }
 }

@@ -4,57 +4,59 @@ import GObject from 'gi://GObject';
 
 import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-export default class ScreenBrightnessGovernorPreferences extends ExtensionPreferences {
+export default class RefreshRateGovernorPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const settingsPage = new SettingsPage(this.getSettings());
         window.add(settingsPage);
     }
 }
 
-export const SettingsPage = GObject.registerClass(class ScreenBrightnessGovernorSettingsPage extends Adw.PreferencesPage {
+export const SettingsPage = GObject.registerClass(class RefreshRateGovernorSettingsPage extends Adw.PreferencesPage {
     _init(settings) {
         super._init();
 
-        const brightnessOnAcSpinBox = new Gtk.SpinButton({
+        const refreshRateOnAcSpinBox = new Gtk.SpinButton({
             adjustment: new Gtk.Adjustment({
-                lower: 0,
-                upper: 100,
+                lower: 30,
+                upper: 240,
                 step_increment: 1,
             }),
             valign: Gtk.Align.CENTER,
-            value: settings.get_int('brightness-ac'),
+            value: settings.get_int('refresh-rate-ac'),
         });
-        brightnessOnAcSpinBox.connect('value-changed', widget => settings.set_int('brightness-ac', widget.get_value()));
+        refreshRateOnAcSpinBox.connect('value-changed', widget => settings.set_int('refresh-rate-ac', widget.get_value()));
 
-        const brightnessOnAcRow = new Adw.ActionRow({
-            activatable_widget: brightnessOnAcSpinBox,
+        const refreshRateOnAcRow = new Adw.ActionRow({
+            activatable_widget: refreshRateOnAcSpinBox,
             title: _('On AC'),
+            subtitle: _('Refresh rate in Hz'),
         });
-        brightnessOnAcRow.add_suffix(brightnessOnAcSpinBox);
+        refreshRateOnAcRow.add_suffix(refreshRateOnAcSpinBox);
 
-        const brightnessOnBatterySpinBox = new Gtk.SpinButton({
+        const refreshRateOnBatterySpinBox = new Gtk.SpinButton({
             adjustment: new Gtk.Adjustment({
-                lower: 0,
-                upper: 100,
+                lower: 30,
+                upper: 240,
                 step_increment: 1,
             }),
             valign: Gtk.Align.CENTER,
-            value: settings.get_int('brightness-battery'),
+            value: settings.get_int('refresh-rate-battery'),
         });
-        brightnessOnBatterySpinBox.connect('value-changed', widget => settings.set_int('brightness-battery', widget.get_value()));
+        refreshRateOnBatterySpinBox.connect('value-changed', widget => settings.set_int('refresh-rate-battery', widget.get_value()));
 
-        const brightnessOnBatteryRow = new Adw.ActionRow({
-            activatable_widget: brightnessOnBatterySpinBox,
+        const refreshRateOnBatteryRow = new Adw.ActionRow({
+            activatable_widget: refreshRateOnBatterySpinBox,
             title: _('On Battery'),
+            subtitle: _('Refresh rate in Hz'),
         });
-        brightnessOnBatteryRow.add_suffix(brightnessOnBatterySpinBox);
+        refreshRateOnBatteryRow.add_suffix(refreshRateOnBatterySpinBox);
 
-        const screenBrightnessGroup = new Adw.PreferencesGroup({
-            title: _('Screen Brightness'),
+        const screenRefreshRateGroup = new Adw.PreferencesGroup({
+            title: _('Screen Refresh Rate'),
         });
-        screenBrightnessGroup.add(brightnessOnAcRow);
-        screenBrightnessGroup.add(brightnessOnBatteryRow);
-        this.add(screenBrightnessGroup);
+        screenRefreshRateGroup.add(refreshRateOnAcRow);
+        screenRefreshRateGroup.add(refreshRateOnBatteryRow);
+        this.add(screenRefreshRateGroup);
 
         // -----------------------------------------------------------------------
 
@@ -64,7 +66,7 @@ export const SettingsPage = GObject.registerClass(class ScreenBrightnessGovernor
         });
         githubLinkRow.add_suffix(new Gtk.LinkButton({
             icon_name: 'adw-external-link-symbolic',
-            uri: 'https://github.com/inbalboa/gnome-brightness-governor',
+            uri: 'https://github.com/sasas991/gnome-refresh-rate-governor',
         }));
         aboutGroup.add(githubLinkRow);
         this.add(aboutGroup);

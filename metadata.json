@@ -1,17 +1,17 @@
 {
-    "uuid": "brightness-governor@inbalboa.github.io",
-    "name": "Screen Brightness Governor",
-    "description": "Automatically switch the screen brightness depending on the power supply status",
-    "url": "https://github.com/inbalboa/gnome-brightness-governor",
+    "uuid": "refresh-rate-governor@sasas991.github.io",
+    "name": "Refresh Rate Governor",
+    "description": "Automatically switch the screen refresh rate depending on the power supply status",
+    "url": "https://github.com/sasas991/gnome-refresh-rate-governor",
     "version": 1,
-    "version-name": "1.1.0",
+    "version-name": "1.2.0",
     "shell-version": ["49"],
     "session-modes": [
         "user",
         "unlock-dialog"
     ],
-    "settings-schema": "org.gnome.shell.extensions.brightness-governor",
+    "settings-schema": "org.gnome.shell.extensions.refresh-rate-governor",
     "donations": {
-        "github": "inbalboa"
+        "github": "sasas991"
     }
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+    <schema id="org.gnome.shell.extensions.refresh-rate-governor" path="/org/gnome/shell/extensions/refresh-rate-governor/">
+        <key name="refresh-rate-ac" type="i">
+            <range min="30" max="240"/>
+            <default>144</default>
+        </key>
+        <key name="refresh-rate-battery" type="i">
+            <range min="30" max="240"/>
+            <default>60</default>
+        </key>
+    </schema>
+</schemalist>
