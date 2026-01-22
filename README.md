@@ -37,7 +37,7 @@ https://extensions.gnome.org/extension/8277/screen-brightness-governor/
 
 ## Acknowledgments
 
-This extension is a fork of [Screen Brightness Governor](https://github.com/inbalboa/gnome-brightness-governor) extension by [Serhiy Shliapuhin](https://github.com/inbalboa/gnome-brightness-governor) adapted to the latest GNOME Shell version. 
+This extension is a fork of [Screen Brightness Governor](https://github.com/inbalboa/gnome-brightness-governor) extension by [Serhiy Shliapuhin](https://github.com/inbalboa) adapted to the latest GNOME Shell version. 
 
 ## License
 
