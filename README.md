@@ -7,7 +7,7 @@ Automatically switch the screen refresh rate depending on the power supply statu
 
 ## Requirements
 
-- GNOME Shell 48+
+- GNOME Shell 49+
 
 ## Installation
 
@@ -35,7 +35,7 @@ Automatically switch the screen refresh rate depending on the power supply statu
 
 ## Acknowledgments
 
-This extension is a fork of [Screen Brightness Governor](https://github.com/inbalboa/gnome-brightness-governor) extension by [Serhiy Shliapuhin](https://github.com/inbalboa) adapted to the latest GNOME Shell version. 
+This extension is a fork of [Screen Brightness Governor](https://github.com/inbalboa/gnome-brightness-governor) extension by [Serhiy Shliapuhin](https://github.com/inbalboa) edited to automatically change screen refresh rate. 
 
 ## License
 
