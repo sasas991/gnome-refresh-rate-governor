@@ -6,10 +6,6 @@
     "version": 1,
     "version-name": "1.2.0",
     "shell-version": ["49"],
-    "session-modes": [
-        "user",
-        "unlock-dialog"
-    ],
     "settings-schema": "org.gnome.shell.extensions.refresh-rate-governor",
     "donations": {
         "github": "sasas991"
