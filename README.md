@@ -3,7 +3,7 @@
 
 Automatically switch the screen refresh rate depending on the power supply status.
 
-![Extension Screenshot](screenshot.png)
+![Extension Screenshot](https://pasteboard.co/vb8fZSUBDKHc.png)
 
 ## Requirements
 
