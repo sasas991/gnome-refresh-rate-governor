@@ -9,10 +9,11 @@ const PowerManagerProxyInterface = `
     <property name="OnBattery" type="b" access="read"/>
   </interface>
 </node>`;
-const PowerManagerProxy = Gio.DBusProxy.makeProxyWrapper(PowerManagerProxyInterface);
+
 
 export default class RefreshRateGovernorExtension extends Extension {
     enable() {
+        const PowerManagerProxy = Gio.DBusProxy.makeProxyWrapper(PowerManagerProxyInterface);
         this._settings = this.getSettings();
         this._refreshRateAcId = this._settings.connect('changed::refresh-rate-ac', () => {
             if (this._powerManagerProxy?.OnBattery === false)
