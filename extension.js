@@ -54,6 +54,7 @@ export default class RefreshRateGovernorExtension extends Extension {
             this._settings.disconnect(this._refreshRateAcId);
             this._refreshRateAcId = null;
         }
+        this._settings = null;
     }
 
     _getConnectorName() {
