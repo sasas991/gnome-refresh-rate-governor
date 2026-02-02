@@ -59,17 +59,8 @@ export default class RefreshRateGovernorExtension extends Extension {
     }
 
     _getConnectorName() {
-        try {
-            const [, output] = GLib.spawn_command_line_sync('displayctl get-default-output');
-            if (output) {
-                const connector = output.toString().trim();
-                if (connector)
-                    return connector;
-            }
-        } catch (e) {
-            logError(e, 'Failed to get default output connector');
-        }
-        // Fallback to common connector names
+        // Use fallback immediately to avoid blocking with sync spawn
+        // Async fetch of the actual connector name could be added later
         return 'eDP-1';
     }
 
