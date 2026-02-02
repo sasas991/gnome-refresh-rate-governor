@@ -1,5 +1,4 @@
 import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 const PowerManagerProxyInterface = `
@@ -133,8 +132,9 @@ export default class RefreshRateGovernorExtension extends Extension {
                         for (const mode of modes) {
                             const [modeId, width, height, rate] = mode;
                             const modeRefreshRate = Math.round(rate);
+                            const desiredRefreshRate = Math.round(refreshRate);
                             
-                            if (modeRefreshRate === refreshRate) {
+                            if (modeRefreshRate === desiredRefreshRate) {
                                 targetMode = mode;
                                 break;
                             }
@@ -176,7 +176,7 @@ export default class RefreshRateGovernorExtension extends Extension {
                     return [x, y, scale, transform, primary, newMonitors];
                 });
                 
-                // Apply the configuration (method 1 = verify, 2 = temporary, 0 = persistent)
+                // Apply the configuration with the new refresh rate
                 this._displayConfigProxy.ApplyMonitorsConfigRemote(
                     serial,
                     1, // Verify method
