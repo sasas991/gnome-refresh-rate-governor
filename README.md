@@ -3,7 +3,7 @@
 
 Automatically switch the screen refresh rate depending on the power supply status.
 
-![Extension Screenshot](https://pasteboard.co/We5RzxEPWhfU.png)
+![Extension Screenshot](https://gcdnb.pbrd.co/images/We5RzxEPWhfU.png?o=1)
 
 ## Requirements
 
@@ -11,7 +11,9 @@ Automatically switch the screen refresh rate depending on the power supply statu
 
 ## Installation
 
+### From GNOME Extensions
 
+https://extensions.gnome.org/extension/9197/refresh-rate-governor/
 
 ### Manual Installation
 
