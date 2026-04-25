@@ -53,7 +53,7 @@ export default class ScreenBrightnessGovernorExtension extends Extension {
         // This extension uses the 'unlock-dialog' session mode to be able
         // to switch the screen brightness when the screen is locked.
         this._powerManagerProxy.disconnectObject(this);
-        delete this._powerManagerProxy;
+        this._powerManagerProxy = null;
 
         if (this._brightnessManagerChangedId && Main.brightnessManager) {
             Main.brightnessManager.disconnect(this._brightnessManagerChangedId);
@@ -68,6 +68,7 @@ export default class ScreenBrightnessGovernorExtension extends Extension {
             this._settings.disconnect(this._brightnessAcId);
             this._brightnessAcId = null;
         }
+        this._settings = null;
     }
 
     _updateScreenBrightness() {
