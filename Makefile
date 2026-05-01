@@ -1,8 +1,10 @@
 UUID=`jq -r '.uuid' metadata.json`
 TAG=`jq -r '."version-name"' metadata.json`
+PACKAGE_NAME=`jq -r '.name' metadata.json`
+PACKAGE_URL=`jq -r '.url' metadata.json`
 POT_FILE = po/example.pot
 PO_FILES = $(wildcard po/*.po)
-JS_FILES = $(shell find . -maxdepth 1 -name '*.js')
+JS_FILES = $(wildcard ./*.js)
 
 check:
 	@printf "==> checking the working tree... "
@@ -31,7 +33,13 @@ reinstall: uninstall install
 po:
 	@printf "==> translation...\n"
 	@mkdir -p po
-	@xgettext $(JS_FILES) --keyword=_:1,2c --from-code=UTF-8 --output=po/example.pot
+	@xgettext $(JS_FILES) \
+		--keyword=_:1,2c \
+		--from-code=UTF-8 \
+		--package-name="$(PACKAGE_NAME)" \
+		--copyright-holder="$(PACKAGE_NAME) contributors" \
+		--msgid-bugs-address="$(PACKAGE_URL)/issues" \
+		--output=po/example.pot
 	@for file in $(PO_FILES); do \
 		msgmerge -Uq --backup=off $$file $(POT_FILE); \
 	done
@@ -43,10 +51,7 @@ clean:
 
 build: clean
 	@printf "==> packaging...\n"
-	@gnome-extensions pack --force \
-	--extra-source="LICENSE" \
-	--extra-source="icons" \
-	--extra-source="lib"
+	@gnome-extensions pack --force --extra-source="LICENSE"
 
 release: check tag pub
 	@printf "\nPublished at %s\n\n" "`date`"
