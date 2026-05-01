@@ -4,7 +4,7 @@
     "description": "Automatically switch the screen brightness depending on the power supply status",
     "url": "https://github.com/inbalboa/gnome-brightness-governor",
     "version": 1,
-    "version-name": "1.2.1",
+    "version-name": "1.2.2",
     "shell-version": ["49", "50"],
     "session-modes": [
         "user",
