@@ -13,6 +13,12 @@ const PowerManagerProxy = Gio.DBusProxy.makeProxyWrapper(PowerManagerProxyInterf
 
 export default class ScreenBrightnessGovernorExtension extends Extension {
     enable() {
+        this._settings = null;
+        this._brightnessAcId = null;
+        this._brightnessBatteryId = null;
+        this._brightnessManagerChangedId = null;
+        this._powerManagerProxy = null;
+
         this._settings = this.getSettings();
         this._brightnessAcId = this._settings.connect('changed::brightness-ac', () => {
             if (this._powerManagerProxy?.OnBattery === false)
@@ -23,7 +29,6 @@ export default class ScreenBrightnessGovernorExtension extends Extension {
                 this._updateScreenBrightness();
         });
 
-        this._brightnessManagerChangedId = null;
         if (Main.brightnessManager) {
             this._brightnessManagerChangedId = Main.brightnessManager.connect('changed', () => {
                 if (Main.brightnessManager.globalScale && this._brightnessManagerChangedId) {
@@ -38,22 +43,26 @@ export default class ScreenBrightnessGovernorExtension extends Extension {
             Gio.DBus.system,
             'org.freedesktop.UPower',
             '/org/freedesktop/UPower',
-            (proxy, error) => {
-                if (error)
-                    this._logError(`Failed to connect to the ${proxy.g_interface_name} D-Bus interface`, error);
+            (_proxy, error) => {
+                if (error) {
+                    console.error('Failed to connect to the org.freedesktop.UPower D-Bus interface', error);
+                    return;
+                }
+                this._powerManagerProxy?.connectObject('g-properties-changed', (_proxy2, properties) => {
+                    if (properties.lookup_value('OnBattery', null) !== null)
+                        this._updateScreenBrightness();
+                }, this);
             }
         );
-        this._powerManagerProxy.connectObject('g-properties-changed', (...[, properties]) => {
-            if (properties.lookup_value('OnBattery', null) !== null)
-                this._updateScreenBrightness();
-        }, this);
     }
 
     disable() {
         // This extension uses the 'unlock-dialog' session mode to be able
         // to switch the screen brightness when the screen is locked.
-        this._powerManagerProxy.disconnectObject(this);
-        this._powerManagerProxy = null;
+        if (this._powerManagerProxy) {
+            this._powerManagerProxy.disconnectObject(this);
+            this._powerManagerProxy = null;
+        }
 
         if (this._brightnessManagerChangedId && Main.brightnessManager) {
             Main.brightnessManager.disconnect(this._brightnessManagerChangedId);
@@ -72,17 +81,10 @@ export default class ScreenBrightnessGovernorExtension extends Extension {
     }
 
     _updateScreenBrightness() {
-        if (!Main.brightnessManager?.globalScale || this._powerManagerProxy?.OnBattery === null)
+        if (!Main.brightnessManager?.globalScale || this._powerManagerProxy?.OnBattery == null)
             return;
 
-        let brightnessPercent;
-        if (this._powerManagerProxy.OnBattery)
-            brightnessPercent = this._settings.get_int('brightness-battery');
-        else
-            brightnessPercent = this._settings.get_int('brightness-ac');
-
-        // (0-100) to (0.0-1.0)
-        const brightnessValue = Math.clamp(brightnessPercent / 100.0, 0.0, 1.0);
-        Main.brightnessManager.globalScale.value = brightnessValue;
+        const key = this._powerManagerProxy.OnBattery ? 'brightness-battery' : 'brightness-ac';
+        Main.brightnessManager.globalScale.value = this._settings.get_int(key) / 100;
     }
 }
