@@ -1,4 +1,5 @@
 import Adw from 'gi://Adw';
+import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
 import GObject from 'gi://GObject';
 
@@ -11,49 +12,34 @@ export default class ScreenBrightnessGovernorPreferences extends ExtensionPrefer
     }
 }
 
+function buildBrightnessRow(settings, key, title) {
+    const spinBox = new Gtk.SpinButton({
+        adjustment: new Gtk.Adjustment({
+            lower: 0,
+            upper: 100,
+            step_increment: 1,
+        }),
+        valign: Gtk.Align.CENTER,
+    });
+    settings.bind(key, spinBox, 'value', Gio.SettingsBindFlags.DEFAULT);
+
+    const row = new Adw.ActionRow({
+        activatable_widget: spinBox,
+        title,
+    });
+    row.add_suffix(spinBox);
+    return row;
+}
+
 export const SettingsPage = GObject.registerClass(class ScreenBrightnessGovernorSettingsPage extends Adw.PreferencesPage {
     _init(settings) {
         super._init();
 
-        const brightnessOnAcSpinBox = new Gtk.SpinButton({
-            adjustment: new Gtk.Adjustment({
-                lower: 0,
-                upper: 100,
-                step_increment: 1,
-            }),
-            valign: Gtk.Align.CENTER,
-            value: settings.get_int('brightness-ac'),
-        });
-        brightnessOnAcSpinBox.connect('value-changed', widget => settings.set_int('brightness-ac', widget.get_value()));
-
-        const brightnessOnAcRow = new Adw.ActionRow({
-            activatable_widget: brightnessOnAcSpinBox,
-            title: _('On AC'),
-        });
-        brightnessOnAcRow.add_suffix(brightnessOnAcSpinBox);
-
-        const brightnessOnBatterySpinBox = new Gtk.SpinButton({
-            adjustment: new Gtk.Adjustment({
-                lower: 0,
-                upper: 100,
-                step_increment: 1,
-            }),
-            valign: Gtk.Align.CENTER,
-            value: settings.get_int('brightness-battery'),
-        });
-        brightnessOnBatterySpinBox.connect('value-changed', widget => settings.set_int('brightness-battery', widget.get_value()));
-
-        const brightnessOnBatteryRow = new Adw.ActionRow({
-            activatable_widget: brightnessOnBatterySpinBox,
-            title: _('On Battery'),
-        });
-        brightnessOnBatteryRow.add_suffix(brightnessOnBatterySpinBox);
-
         const screenBrightnessGroup = new Adw.PreferencesGroup({
             title: _('Screen Brightness'),
         });
-        screenBrightnessGroup.add(brightnessOnAcRow);
-        screenBrightnessGroup.add(brightnessOnBatteryRow);
+        screenBrightnessGroup.add(buildBrightnessRow(settings, 'brightness-ac', _('On AC')));
+        screenBrightnessGroup.add(buildBrightnessRow(settings, 'brightness-battery', _('On Battery')));
         this.add(screenBrightnessGroup);
 
         // -----------------------------------------------------------------------
