@@ -1,14 +1,15 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# Copyright (C) YEAR Screen Brightness Governor contributors
+# This file is distributed under the same license as the Screen Brightness Governor package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-25 23:21+0300\n"
+"Project-Id-Version: Screen Brightness Governor\n"
+"Report-Msgid-Bugs-To: https://github.com/inbalboa/gnome-brightness-governor/"
+"issues\n"
+"POT-Creation-Date: 2026-05-01 12:16+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,23 +18,23 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: prefs.js:31
-msgid "On AC"
-msgstr ""
-
-#: prefs.js:48
-msgid "On Battery"
-msgstr ""
-
-#: prefs.js:53
+#: prefs.js:39
 msgid "Screen Brightness"
 msgstr ""
 
-#: prefs.js:74
+#: prefs.js:41
+msgid "On AC"
+msgstr ""
+
+#: prefs.js:42
+msgid "On Battery"
+msgstr ""
+
+#: prefs.js:60
 msgid "This project is licensed under the GPL-3.0 License."
 msgstr ""
 
-#: prefs.js:75
+#: prefs.js:61
 #, javascript-format
 msgid "See the %sLicense%s for details."
 msgstr ""
