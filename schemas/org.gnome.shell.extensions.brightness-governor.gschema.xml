@@ -4,10 +4,14 @@
         <key name="brightness-ac" type="i">
             <range min="0" max="100"/>
             <default>90</default>
+            <summary>Screen brightness on AC power</summary>
+            <description>Target screen brightness, in percent (0-100), applied when the device is connected to AC power.</description>
         </key>
         <key name="brightness-battery" type="i">
             <range min="0" max="100"/>
             <default>25</default>
+            <summary>Screen brightness on battery</summary>
+            <description>Target screen brightness, in percent (0-100), applied when the device is running on battery.</description>
         </key>
     </schema>
 </schemalist>
