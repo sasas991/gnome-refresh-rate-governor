@@ -51,7 +51,7 @@ export default class RefreshRateGovernorExtension extends Extension {
             '/org/freedesktop/UPower',
             (proxy, error) => {
                 if (error)
-                    logError(error, `Failed to connect to the ${proxy.g_interface_name} D-Bus interface`);
+                    console.error(`Refresh Rate Governor: failed to connect to ${proxy.g_interface_name}`, error);
             }
         );
 
@@ -61,7 +61,7 @@ export default class RefreshRateGovernorExtension extends Extension {
             '/org/gnome/Mutter/DisplayConfig',
             (proxy, error) => {
                 if (error)
-                    logError(error, 'Failed to connect to org.gnome.Mutter.DisplayConfig');
+                    console.error('Refresh Rate Governor: failed to connect to org.gnome.Mutter.DisplayConfig', error);
             }
         );
 
@@ -111,7 +111,7 @@ export default class RefreshRateGovernorExtension extends Extension {
         try {
             this._displayConfigProxy.GetCurrentStateRemote((result, error) => {
                 if (error) {
-                    logError(error, 'Failed to get current display state');
+                    console.error('Refresh Rate Governor: failed to get current display state', error);
                     return;
                 }
 
@@ -134,7 +134,7 @@ export default class RefreshRateGovernorExtension extends Extension {
 
                 const currentTargetMode = currentModeByConnector.get(this._connectorName);
                 if (!currentTargetMode) {
-                    log(`Refresh Rate Governor: monitor ${this._connectorName} not found or has no active mode`);
+                    console.debug(`Refresh Rate Governor: monitor ${this._connectorName} not found or has no active mode`);
                     return;
                 }
 
@@ -161,7 +161,7 @@ export default class RefreshRateGovernorExtension extends Extension {
                 ) ?? candidates[0];
 
                 if (!targetMode) {
-                    log(`Refresh Rate Governor: no ${curWidth}x${curHeight}@${desiredRate}Hz mode on ${this._connectorName}`);
+                    console.debug(`Refresh Rate Governor: no ${curWidth}x${curHeight}@${desiredRate}Hz mode on ${this._connectorName}`);
                     return;
                 }
 
@@ -190,14 +190,14 @@ export default class RefreshRateGovernorExtension extends Extension {
                     {},
                     (_result, applyError) => {
                         if (applyError)
-                            logError(applyError, `Failed to apply refresh rate ${refreshRate}Hz`);
+                            console.error(`Refresh Rate Governor: failed to apply ${refreshRate}Hz`, applyError);
                         else
-                            log(`Successfully set refresh rate to ${refreshRate}Hz`);
+                            console.debug(`Refresh Rate Governor: set refresh rate to ${refreshRate}Hz`);
                     }
                 );
             });
         } catch (e) {
-            logError(e, `Failed to set refresh rate to ${refreshRate}`);
+            console.error(`Refresh Rate Governor: failed to set refresh rate to ${refreshRate}`, e);
         }
     }
 }
