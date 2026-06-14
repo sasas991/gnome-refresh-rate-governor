@@ -115,76 +115,82 @@ export default class RefreshRateGovernorExtension extends Extension {
                     return;
                 }
 
-                const [serial, monitors, logicalMonitors, properties] = result;
+                const [serial, monitors, logicalMonitors] = result;
+                const desiredRate = Math.round(refreshRate);
 
-                // Find the monitor with our connector name
-                let targetMonitor = null;
-                let targetMode = null;
-
+                // Resolve each connector's currently-active mode in one pass.
+                // On GNOME 50, VRR exposes a "fixed" and "variable" variant of
+                // each (w,h,rate) tuple; the `is-current` property and the
+                // `refresh-rate-mode` string in mode[6] are what we use to
+                // preserve resolution and the VRR state when only changing rate.
+                const currentModeByConnector = new Map();
                 for (const monitor of monitors) {
-                    const [monitorSpec, modes, monitorProps] = monitor;
-                    const [connector] = monitorSpec;
-
-                    if (connector === this._connectorName) {
-                        targetMonitor = monitor;
-
-                        // Find a mode with the desired refresh rate
-                        for (const mode of modes) {
-                            const [modeId, width, height, rate] = mode;
-                            const modeRefreshRate = Math.round(rate);
-                            const desiredRefreshRate = Math.round(refreshRate);
-
-                            if (modeRefreshRate === desiredRefreshRate) {
-                                targetMode = mode;
-                                break;
-                            }
-                        }
-                        break;
-                    }
+                    const [[connector]] = monitor;
+                    const modes = monitor[1];
+                    const current = modes.find(m => unpackProp(m[6], 'is-current') === true);
+                    if (current)
+                        currentModeByConnector.set(connector, current);
                 }
 
-                if (!targetMonitor || !targetMode) {
-                    log(`Could not find monitor ${this._connectorName} or mode with ${refreshRate}Hz`);
+                const currentTargetMode = currentModeByConnector.get(this._connectorName);
+                if (!currentTargetMode) {
+                    log(`Refresh Rate Governor: monitor ${this._connectorName} not found or has no active mode`);
                     return;
                 }
 
-                // Build the new logical monitors configuration
+                const [, curWidth, curHeight, curRate, , , curProps] = currentTargetMode;
+                const curRrMode = unpackProp(curProps, 'refresh-rate-mode') ?? 'fixed';
+
+                if (Math.round(curRate) === desiredRate) {
+                    // Already at the target rate; nothing to apply.
+                    return;
+                }
+
+                // Find a target mode that:
+                //   - keeps the current resolution (don't accidentally downscale),
+                //   - matches the requested refresh rate,
+                //   - prefers the same refresh-rate-mode (fixed/variable) as now,
+                //     so we don't unintentionally toggle VRR.
+                const targetMonitor = monitors.find(m => m[0][0] === this._connectorName);
+                const candidates = targetMonitor[1].filter(m => {
+                    const [, w, h, rate] = m;
+                    return w === curWidth && h === curHeight && Math.round(rate) === desiredRate;
+                });
+                const targetMode = candidates.find(m =>
+                    (unpackProp(m[6], 'refresh-rate-mode') ?? 'fixed') === curRrMode
+                ) ?? candidates[0];
+
+                if (!targetMode) {
+                    log(`Refresh Rate Governor: no ${curWidth}x${curHeight}@${desiredRate}Hz mode on ${this._connectorName}`);
+                    return;
+                }
+
+                // Build logical_monitors using each monitor's CURRENT mode id.
+                // The previous code used modes[0][0] (just the first listed mode),
+                // which on GNOME 50 is no longer the active one.
                 const newLogicalMonitors = logicalMonitors.map(lm => {
-                    const [x, y, scale, transform, primary, monitorsInLm, lmProps] = lm;
-
+                    const [x, y, scale, transform, primary, monitorsInLm] = lm;
                     const newMonitors = monitorsInLm.map(m => {
-                        const [lmConnector, lmVendor, lmProduct, lmSerial] = m;
-
-                        if (lmConnector === this._connectorName) {
-                            const [modeId] = targetMode;
-                            return [lmConnector, modeId, {}];
-                        } else {
-                            // Keep existing mode for other monitors
-                            // We need to find their current mode ID
-                            for (const monitor of monitors) {
-                                const [monitorSpec, modes] = monitor;
-                                const [connector] = monitorSpec;
-
-                                if (connector === lmConnector && modes.length > 0) {
-                                    return [lmConnector, modes[0][0], {}];
-                                }
-                            }
-                            return [lmConnector, '', {}];
-                        }
+                        const lmConnector = m[0];
+                        if (lmConnector === this._connectorName)
+                            return [lmConnector, targetMode[0], {}];
+                        const existing = currentModeByConnector.get(lmConnector);
+                        return [lmConnector, existing ? existing[0] : '', {}];
                     });
-
                     return [x, y, scale, transform, primary, newMonitors];
                 });
 
-                // Apply the configuration with the new refresh rate
+                // method=1 is "temporary" (per mutter DisplayConfig docs:
+                // 0=verify, 1=temporary, 2=persistent). Temporary is what we
+                // want here — runtime override, not user-config-level persist.
                 this._displayConfigProxy.ApplyMonitorsConfigRemote(
                     serial,
-                    1, // Verify method
+                    1,
                     newLogicalMonitors,
                     {},
-                    (result, error) => {
-                        if (error)
-                            logError(error, `Failed to apply refresh rate ${refreshRate}Hz`);
+                    (_result, applyError) => {
+                        if (applyError)
+                            logError(applyError, `Failed to apply refresh rate ${refreshRate}Hz`);
                         else
                             log(`Successfully set refresh rate to ${refreshRate}Hz`);
                     }
@@ -194,4 +200,12 @@ export default class RefreshRateGovernorExtension extends Extension {
             logError(e, `Failed to set refresh rate to ${refreshRate}`);
         }
     }
+}
+
+// `a{sv}` dict values may arrive as GLib.Variant or already unwrapped depending
+// on the proxy build; handle both.
+function unpackProp(props, key) {
+    const v = props?.[key];
+    if (v == null) return null;
+    return typeof v.deepUnpack === 'function' ? v.deepUnpack() : v;
 }
